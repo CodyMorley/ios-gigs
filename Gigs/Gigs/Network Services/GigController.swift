@@ -27,7 +27,7 @@ class GigController {
     
     
     //MARK: - Properties -
-    private var bearer: Bearer?
+    var bearer: Bearer?
     
     private var baseURL = URL(string: "https://lambdagigapi.herokuapp.com/api")!
     private lazy var signUpURL = baseURL.appendingPathComponent("/users/signup/")
@@ -38,7 +38,7 @@ class GigController {
     
     
     //MARK: - Network Functions -
-    func signUp(as user: User, completion: CompletionHandler) {
+    func signUp(as user: User, completion: @escaping CompletionHandler) {
         var request = URLRequest(url: signUpURL)
         request.httpMethod = HTTPMethod.post.rawValue
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -47,7 +47,7 @@ class GigController {
             let encodedUser = try jsonEncoder.encode(user)
             request.httpBody = encodedUser
             
-            let signUpTask = URLSession.shared.dataTask(with: request) { (_, response, error) in
+            let signUpTask = URLSession.shared.dataTask(with: request) { ( _, response, error) in
                 if let error = error {
                     NSLog("A problem occured during sign up: \(error) " + String(describing: error.localizedDescription))
                     completion(.failure(.otherError))
@@ -56,14 +56,14 @@ class GigController {
                 
                 guard let response = response as? HTTPURLResponse,
                     response.statusCode == 200 else {
-                        NSLog("Bad response from server during sign up: " + String(describing: response?.statusCode))
+                        NSLog("Bad response from server during sign up.")
                         completion(.failure(.badResponse))
                         return
                 }
                 
-                completion(.success(.true))
+                completion(.success(true))
             }
-            task.resume()
+            signUpTask.resume()
         } catch {
             NSLog("Failed to encode user data. \(error)")
             completion(.failure(.noEncode))

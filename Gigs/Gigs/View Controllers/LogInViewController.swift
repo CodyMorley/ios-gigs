@@ -9,20 +9,32 @@
 import UIKit
 
 class LogInViewController: UIViewController {
+    //MARK: - Enums & Type Aliases -
+    enum LoginType {
+        case signUp
+        case logIn
+    }
     
+    //MARK: - Properties -
     @IBOutlet weak var LogInSignUpSegmentedControl: UISegmentedControl!
     @IBOutlet weak var usernameField: UITextField!
     @IBOutlet weak var passwordField: UITextField!
     @IBOutlet weak var logInSignUpButton: UIButton!
     
+    var gigController: GigController?
+    
+    var loginType: LoginType
     
     
+    //MARK: - Life Cycles -
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
     }
     
+    
+    //MARK: - Actions -
     @IBAction func logInSignUpToggle(_ sender: Any) {
     }
     
