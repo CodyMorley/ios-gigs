@@ -16,7 +16,7 @@ class LogInViewController: UIViewController {
     }
     
     //MARK: - Properties -
-    @IBOutlet weak var LogInSignUpSegmentedControl: UISegmentedControl!
+    @IBOutlet weak var logInSignUpSegmentedControl: UISegmentedControl!
     @IBOutlet weak var usernameField: UITextField!
     @IBOutlet weak var passwordField: UITextField!
     @IBOutlet weak var logInSignUpButton: UIButton!
@@ -35,10 +35,46 @@ class LogInViewController: UIViewController {
     
     
     //MARK: - Actions -
-    @IBAction func logInSignUpToggle(_ sender: Any) {
+    @IBAction func logInSignUpToggle(_ sender: UISegmentedControl) {
+        if sender.selectedSegmentIndex == 0 {
+            loginType = .logIn
+            logInSignUpButton.setTitle("Log In", for: .normal)
+        } else {
+            loginType = .signUp
+            logInSignUpButton.setTitle("Sign Up", for: .normal)
+        }
     }
     
     @IBAction func sendLogInSignUp(_ sender: Any) {
+        if let username = usernameField.text,
+            !username.isEmpty,
+            let password = passwordField.text,
+            !password.isEmpty {
+            let user = User(username: username, password: password)
+            
+            if loginType == .signUp {
+                gigController?.signUp(as: user, completion: { result in
+                    do {
+                        let successs = try result.get()
+                        if successs {
+                            DispatchQueue.main.async {
+                                let signUpAlert = UIAlertController(title: "Sign Up Successful", message: "Please log in", preferredStyle: .alert)
+                                let alertAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+                                signUpAlert.addAction(alertAction)
+                                self.present(signUpAlert, animated: true) {
+                                    self.loginType = .logIn
+                                    self.logInSignUpSegmentedControl.selectedSegmentIndex = 0
+                                    self.logInSignUpButton.setTitle("Sign In", for: .normal)
+                                }
+                            }
+                        }
+                    } catch {
+                        NSLog("Error signing up: \(error)")
+                    }
+                })
+            } //else //TODO FILL THIS WITH TOMORROW'S PROJECT.
+            
+        }
     }
     
     
