@@ -23,13 +23,20 @@ class LogInViewController: UIViewController {
     
     var gigController: GigController?
     
-    var loginType: LoginType
+    var loginType = LoginType.signUp
     
     
     //MARK: - Life Cycles -
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        if loginType == .logIn {
+            logInSignUpButton.setTitle("Log In", for: .normal)
+            logInSignUpSegmentedControl.selectedSegmentIndex = 0
+        } else if loginType == .signUp {
+            logInSignUpButton.setTitle("Sign Up", for: .normal)
+            logInSignUpSegmentedControl.selectedSegmentIndex = 1
+        }
         // Do any additional setup after loading the view.
     }
     
@@ -72,7 +79,33 @@ class LogInViewController: UIViewController {
                         NSLog("Error signing up: \(error)")
                     }
                 })
-            } //else //TODO FILL THIS WITH TOMORROW'S PROJECT.
+            } else {
+                gigController?.logIn(as: user, completion: { result in
+                    do {
+                        let success = try result.get()
+                        if success {
+                            DispatchQueue.main.async {
+                                self.dismiss(animated: true, completion: nil)
+                            }
+                        }
+                    } catch {
+                        if let error = error as? GigController.NetworkError {
+                            switch error {
+                            case .noData:
+                                print("No data recieved.")
+                            case .noEncode:
+                                print("There was a problem encoding data to send.")
+                            case .noDecode:
+                                print("There was a problem decoding data from source.")
+                            case .badResponse:
+                                print("Bad response from HTTP server.")
+                            default:
+                                print("Error processing your request.")
+                            }
+                        }
+                    }
+                })
+            }
             
         }
     }

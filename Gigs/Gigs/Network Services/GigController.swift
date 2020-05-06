@@ -72,7 +72,50 @@ class GigController {
         
     }
     
-    func logIn(){
+    func logIn(as user: User, completion: @escaping CompletionHandler) {
+        var request = URLRequest(url: logInURL)
+        request.httpMethod = HTTPMethod.post.rawValue
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        do {
+            let encodedUser = try jsonEncoder.encode(user)
+            request.httpBody = encodedUser
+            
+            let logInTask = URLSession.shared.dataTask(with: request) { ( data, response, error) in
+                if let error = error {
+                    NSLog("A problem occured during sign up: \(error) " + String(describing: error.localizedDescription))
+                    completion(.failure(.otherError))
+                    return
+                }
+                
+                guard let response = response as? HTTPURLResponse,
+                    response.statusCode == 200 else {
+                        NSLog("Bad response from server during log in.")
+                        completion(.failure(.badResponse))
+                        return
+                }
+                
+                guard let data = data else {
+                    NSLog("No token recieved from host.")
+                    completion(.failure(.noData))
+                    return
+                }
+                
+                do {
+                    self.bearer = try self.jsonDecoder.decode(Bearer.self, from: data)
+                } catch {
+                    NSLog("Error decoding bearer token. Please try again. \(error)")
+                    completion(.failure(.noDecode))
+                    return
+                }
+                completion(.success(true))
+            }
+            logInTask.resume()
+        } catch {
+            NSLog("Failed to encode user data. \(error)")
+            completion(.failure(.noEncode))
+            return
+        }
         
     }
     
