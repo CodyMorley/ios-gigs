@@ -11,7 +11,7 @@ import UIKit
 class GigsTableViewController: UITableViewController {
     //MARK: - Properties -
     var gigController = GigController()
-    
+    var dateFormatter = DateFormatter()
     
     
     //MARK: - Life Cycles -
@@ -47,12 +47,11 @@ class GigsTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "GigCell", for: indexPath)
-               cell.textLabel?.text = gigs[indexPath.row].title
-               dateFormatter.dateStyle = .short
-               dateFormatter.timeStyle = .short
-               cell.detailTextLabel?.text = dateFormatter.string(from: gigs[indexPath.row].dueDate)
-               return cell
-
+        cell.textLabel?.text = gigController.gigs[indexPath.row].title
+        dateFormatter.dateStyle = .short
+        dateFormatter.timeStyle = .short
+        cell.detailTextLabel?.text = dateFormatter.string(from: gigController.gigs[indexPath.row].dueDate)
+        
         return cell
     }
 
@@ -91,14 +90,17 @@ class GigsTableViewController: UITableViewController {
     }
     */
 
-    /*
+    
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+        if segue.description ==  "LoginSignUpSegue" {
+           if let loginVC = segue.destination as? LogInViewController {
+                loginVC.gigController = self.gigController
+            }
+        }
     }
-    */
+    
 
 }
