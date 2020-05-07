@@ -20,7 +20,7 @@ class GigController {
     }
     
     enum NetworkError: Error {
-        case noData, noEncode, noDecode, badResponse, otherError
+        case noData, noEncode, noDecode, badResponse, otherError, noToken
     }
     
     typealias CompletionHandler = (Result<Bool, NetworkError>) -> Void
@@ -28,10 +28,12 @@ class GigController {
     
     //MARK: - Properties -
     var bearer: Bearer?
+    var gigs: [Gig] = []
     
     private var baseURL = URL(string: "https://lambdagigapi.herokuapp.com/api")!
     private lazy var signUpURL = baseURL.appendingPathComponent("/users/signup/")
     private lazy var logInURL = baseURL.appendingPathComponent("/users/login/")
+    private lazy var gigsURL = baseURL.appendingPathComponent("/gigs/")
     
     private lazy var jsonEncoder = JSONEncoder()
     private lazy var jsonDecoder = JSONDecoder()
@@ -120,5 +122,107 @@ class GigController {
         
     }
     
+    func getAllGigs(completion: @escaping (Result<[Gig], NetworkError>) -> Void) {
+        guard let bearer = bearer else {
+            NSLog("No token found. Please log in.")
+            completion(.failure(.noToken))
+            return
+        }
+        
+        var gigsRequest = URLRequest(url: gigsURL)
+        gigsRequest.httpMethod = HTTPMethod.get.rawValue
+        gigsRequest.setValue("Bearer \(bearer.token)", forHTTPHeaderField: "Authorization")
+        
+        let gigsTask = URLSession.shared.dataTask(with: gigsRequest) { data, response, error in
+            if let error = error {
+                NSLog("An error occurred while fetching gigs from the server. \(error) \(error.localizedDescription)")
+                completion(.failure(.otherError))
+                return
+            }
+            
+            guard let response = response as? HTTPURLResponse,
+                response.statusCode == 200 else {
+                    NSLog("Bad response from HTTP server when fetching gigs.")
+                    completion(.failure(.badResponse))
+                    return
+            }
+            
+            guard let data = data else {
+                NSLog("No gigs data returned from request.")
+                completion(.failure(.noData))
+                return
+            }
+            
+            do {
+                self.jsonDecoder.dateDecodingStrategy = .iso8601
+                let decodedGigs = try self.jsonDecoder.decode([Gig].self, from: data)
+                self.gigs = decodedGigs
+                completion(.success(decodedGigs))
+            } catch {
+                NSLog("Could not decode gigs from request. \(error)")
+                completion(.failure(.noDecode))
+                return
+            }
+        }
+        gigsTask.resume()
+    }
+    
+    func createGig(posting gig: Gig, completion: @escaping (Result<Gig, NetworkError>) -> Void) {
+        guard let bearer = bearer else {
+            NSLog("No token found. Please log in.")
+            completion(.failure(.noToken))
+            return
+        }
+        
+        var gigRequest = URLRequest(url: gigsURL)
+        gigRequest.httpMethod = HTTPMethod.post.rawValue
+        gigRequest.setValue("Bearer \(bearer.token)", forHTTPHeaderField: "Authorization")
+        
+        do {
+            self.jsonEncoder.dateEncodingStrategy = .iso8601
+            let jsonGig = try self.jsonEncoder.encode(gig)
+            gigRequest.httpBody = jsonGig
+            
+            let gigTask = URLSession.shared.dataTask(with: gigRequest) { data, response, error in
+                if let error = error {
+                    NSLog("An error occured posting your gig. Please try again. \(error)")
+                    completion(.failure(.otherError))
+                    return
+                }
+                
+                guard let response = response as? HTTPURLResponse,
+                    response.statusCode == 200 else {
+                        NSLog("Bad response when posting gig.")
+                        completion(.failure(.badResponse))
+                        return
+                }
+                
+                guard let data = data else {
+                    NSLog("No data returned when posting gig.")
+                    completion(.failure(.noData))
+                    return
+                }
+                
+                do {
+                    self.jsonDecoder.dateDecodingStrategy = .iso8601
+                    let newGig = try self.jsonDecoder.decode(Gig.self, from: data)
+                    self.gigs.append(newGig)
+                    completion(.success(newGig))
+                } catch {
+                    NSLog("Error decoding data from JSON.")
+                    completion(.failure(.noDecode))
+                    return
+                }
+            }
+            gigTask.resume()
+            
+        } catch {
+            NSLog("Something went wrong encoding your gig. Please try again.")
+            completion(.failure(.noEncode))
+            return
+        }
+        
+        
+    }
     
 }
