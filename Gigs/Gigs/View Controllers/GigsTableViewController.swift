@@ -42,11 +42,16 @@ class GigsTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return 0
+        return gigController.gigs.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "GigCell", for: indexPath)
+               cell.textLabel?.text = gigs[indexPath.row].title
+               dateFormatter.dateStyle = .short
+               dateFormatter.timeStyle = .short
+               cell.detailTextLabel?.text = dateFormatter.string(from: gigs[indexPath.row].dueDate)
+               return cell
 
         return cell
     }
