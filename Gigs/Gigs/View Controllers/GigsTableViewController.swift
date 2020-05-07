@@ -23,6 +23,11 @@ class GigsTableViewController: UITableViewController {
         }
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        tableView.reloadData()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -95,9 +100,15 @@ class GigsTableViewController: UITableViewController {
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.description ==  "LoginSignUpSegue" {
+        if segue.identifier ==  "LoginSignUpSegue" {
            if let loginVC = segue.destination as? LogInViewController {
                 loginVC.gigController = self.gigController
+            }
+        } else if segue.identifier == "ShowGig" {
+            if let detailVC = segue.destination as? GigDetailViewController,
+                let gigLocation = tableView.indexPathForSelectedRow?.row {
+                detailVC.gigController = self.gigController
+                detailVC.gig = self.gigController.gigs[gigLocation]
             }
         }
     }

@@ -167,7 +167,7 @@ class GigController {
         gigsTask.resume()
     }
     
-    func createGig(posting gig: Gig, completion: @escaping (Result<Gig, NetworkError>) -> Void) {
+    func createGig(posting gig: Gig, completion: @escaping (Result<Gig, NetworkError>) -> Void = {_ in}) {
         guard let bearer = bearer else {
             NSLog("No token found. Please log in.")
             completion(.failure(.noToken))
