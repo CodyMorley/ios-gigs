@@ -149,8 +149,17 @@
                         <viewLayoutGuide key="safeArea" id="Ftm-Kb-Gz8"/>
                     </view>
                     <navigationItem key="navigationItem" id="XJh-Qh-CiT">
-                        <barButtonItem key="rightBarButtonItem" systemItem="save" id="HQe-y3-ZsD"/>
+                        <barButtonItem key="rightBarButtonItem" systemItem="save" id="HQe-y3-ZsD">
+                            <connections>
+                                <action selector="saveGig:" destination="V8w-mx-rgT" id="W4w-eF-Scb"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
+                    <connections>
+                        <outlet property="descriptionTextView" destination="xF0-Mz-qmm" id="ugm-eG-xjv"/>
+                        <outlet property="dueDatePicker" destination="vcT-My-sNU" id="nzR-Uq-v3i"/>
+                        <outlet property="jobTitleTextField" destination="QCc-xf-aAr" id="GaZ-5V-sv7"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="YHf-Ut-Kft" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>

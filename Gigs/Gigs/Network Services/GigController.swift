@@ -37,6 +37,7 @@ class GigController {
     private lazy var jsonDecoder = JSONDecoder()
     
     
+    
     //MARK: - Network Functions -
     func signUp(as user: User, completion: @escaping CompletionHandler) {
         var request = URLRequest(url: signUpURL)
